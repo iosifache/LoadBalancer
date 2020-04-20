@@ -1,0 +1,13 @@
+// Configuration
+const DEFAULT_WIDTH = 800
+const DEFAULT_HEIGHT = 600
+
+// Get current screen parameters
+var (position_x, position_y, screen_width, screen_heigth) = View.screenBox(0, #workarea, #rectw)
+
+// Log
+stdout.printf("[TIScript] Width of window is: %d\n", DEFAULT_WIDTH)
+stdout.printf("[TIScript] Heigth of window is: %d\n", DEFAULT_HEIGHT)
+
+// Set window dimensions and center
+view.move(position_x + (screen_width - DEFAULT_WIDTH) / 2, position_y + (screen_heigth - DEFAULT_HEIGHT) / 2, DEFAULT_WIDTH, DEFAULT_HEIGHT, true)

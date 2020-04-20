@@ -1,0 +1,71 @@
+# Compiler and linker's flags
+CPP = g++
+CPP_FLAGS = -g
+LINK_FLAGS = `pkg-config --cflags --libs gtk+-3.0` -ldl
+
+# Defines
+DEFINES_CLI = -DCLI_BUILD
+DEFINES_SCITER = -DSCITER_BUILD
+
+# Project's components 
+COMMON_BUILD = common
+SCITER_BUILD = sciter
+CLI_BUILD = cli
+
+# Project's folders
+UI_FOLDER = ui
+HEADER_FOLDER = headers
+SOURCE_FOLDER = sources
+BUILD_FOLDER = build
+COMMON_HEADER_FOLDER = $(HEADER_FOLDER)/$(COMMON_BUILD)
+SCITER_HEADER_FOLDER = $(HEADER_FOLDER)/$(SCITER_BUILD)
+COMMON_SOURCE_FOLDER = $(SOURCE_FOLDER)/$(COMMON_BUILD)
+CLI_SOURCE_FOLDER = $(SOURCE_FOLDER)/$(CLI_BUILD)
+SCITER_SOURCE_FOLDER = $(SOURCE_FOLDER)/$(SCITER_BUILD)
+
+# Project's files
+RESOURCES_SOURCE_FILE = $(SCITER_SOURCE_FOLDER)/Resources.cpp
+COMMON_SOURCE_FILES = $(COMMON_SOURCE_FOLDER)/*
+CLI_SOURCE_FILES = $(CLI_SOURCE_FOLDER)/*
+SCITER_SOURCE_FILES = $(SCITER_SOURCE_FOLDER)/*
+
+# Sciter's folder and files
+SCITER_SDK_FOLDER = ./libraries/sciter-sdk
+SCITER_INCLUDE_FOLDER = $(SCITER_SDK_FOLDER)/include
+SCITER_BINARIES_FOLDER = $(SCITER_SDK_FOLDER)/bin.lnx
+SCITER_LIBRARIES_FOLDER = $(SCITER_BINARIES_FOLDER)/x64
+SCITER_UI_PACKER = $(SCITER_BINARIES_FOLDER)/packfolder
+
+# Sciter's files
+SCITER_GTK_MAIN_SOURCE_FILE = $(SCITER_INCLUDE_FOLDER)/sciter-gtk-main.cpp
+SCITER_MAIN_LIBRARY = $(SCITER_LIBRARIES_FOLDER)/libsciter-gtk.so
+
+# Final executable filename
+EXECUTABLE_FILE = $(BUILD_FOLDER)/load_balancer
+
+# Special attributes for targets
+.PHONY: run
+.ONESHELL: run
+
+# Target for running all targets for Sciter build
+all: clean build_sciter
+
+# Target for running the executable
+run:
+	export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(SCITER_LIBRARIES_FOLDER)
+	./$(EXECUTABLE_FILE)
+
+# Target for building the Sciter project
+build_sciter:
+	chmod +x $(SCITER_UI_PACKER)
+	$(SCITER_UI_PACKER) $(UI_FOLDER) $(RESOURCES_SOURCE_FILE) -v "resources"
+	$(CPP) $(CPP_FLAGS) $(COMMON_SOURCE_FILES) $(SCITER_SOURCE_FILES) $(SCITER_GTK_MAIN_SOURCE_FILE) -I $(SCITER_INCLUDE_FOLDER) -I $(COMMON_HEADER_FOLDER) -I $(SCITER_HEADER_FOLDER) -L $(SCITER_LIBRARIES_FOLDER) $(SCITER_MAIN_LIBRARY) $(LINK_FLAGS) -o $(EXECUTABLE_FILE)
+
+# Target for building the CLI project
+build_cli:
+	$(CPP) $(CPP_FLAGS) $(COMMON_SOURCE_FILES) $(CLI_SOURCE_FILES) $(PROJECT_SOURCE_FILES) -I $(COMMON_HEADER_FOLDER) -o $(EXECUTABLE_FILE)
+
+# Target for cleaning the project
+clean:
+	rm -f $(RESOURCES_SOURCE_FILE)
+	rm -rf $(BUILD_FOLDER)/*
