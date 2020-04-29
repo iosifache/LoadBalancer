@@ -15,8 +15,10 @@ class CWindow: public sciter::window{
 
 	public:
 
-		CWindow(): window(SW_TITLEBAR | SW_CONTROLS | SW_MAIN | SW_ENABLE_DEBUG){};
+        // Constructor
+		CWindow();
 
+        // Method that informations about load balancer and servers
         sciter::string GetLoadBalancerInfos();
         sciter::string GetServerInfo(sciter::value server_id);
 
@@ -27,7 +29,13 @@ class CWindow: public sciter::window{
 		END_FUNCTION_MAP
 
     private:
-        CLoadBalancer load_balancer;
+
+        // Members
+        pthread_t load_balancer_thread;
+
+        // Methods that serialize infos that will be sended to UI
+        static char *SerializeLoadBalancerInfos(LoadBalancerInfos *infos);
+        static char *SerializeServerInfos(ServerInfos *infos);
 
 };
 
