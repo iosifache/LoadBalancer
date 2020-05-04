@@ -1,0 +1,72 @@
+<html>
+
+	<head>
+
+		<!-- Title -->
+		<title>Load Balancer</title>
+
+		<!-- Stylesheets -->
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,800;1,700&display=swap"/>
+		<link rel="stylesheet" href="https://cdn.rawgit.com/theus/chart.css/v1.0.0/dist/chart.css"/>
+		<link rel="stylesheet" href="stylesheets/all.css"/>
+
+		<!-- Script -->
+		<script type="text/tiscript" src="scripts/window_properties.tis"></script>
+
+	</head>
+
+	<body>
+
+		<!-- Title of the view -->
+		<h1><b>Load Balancer</b> Dashboard</h1>
+
+		<!-- Overall stats -->
+		<div id="overall-stats">
+			<h2>Overall Status <small>of load balancer</small></h2>
+			<div id="stats">
+				<div class="stat">
+					<div class="value" id="number_of_managed_servers"></div>
+					<div class="caption">
+						managed servers
+					</div>
+				</div>
+				<div class="stat">
+					<div class="value" id="average_load"></div>
+					<div class="caption">
+						average load
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Shitty sequence of break lines to make the next div to go to the next line -->
+		<br><br><br><br><br><br><br><br>
+
+		<!-- Chart with requests per minute -->
+		<div id="requests-chart">
+			<h2>Total Requests <small>for the last 10 minutes</small></h2>
+			<div class="charts" id="chart_list"></div>
+		</div>
+
+		<!-- Table with active servers -->
+		<div id="stats-per-server">
+			<h2>Individual Status <small>per each server</small></h2>
+			<table>
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Active Cores</th>
+						<th>Occupied Cores</th>
+						<th>Load</th>
+					</tr>
+				</thead>
+				<tbody id="stats_per_server"></tbody>
+			</table>
+		</div>
+
+		<!-- Script -->
+		<script type="text/tiscript" src="scripts/bind_data.tis"></script>
+
+	</body>
+
+</html>
