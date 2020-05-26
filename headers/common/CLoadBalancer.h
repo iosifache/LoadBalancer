@@ -2,6 +2,8 @@
 
 #define _CLOAD_BALANCER_H_
 
+#include"conectionDetails.h"
+
 #include "CServer.h"
 #include "CPacket.h"
 #include "ILoadBalancer.h"

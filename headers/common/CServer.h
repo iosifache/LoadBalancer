@@ -2,6 +2,8 @@
 
 #define _CSERVER_
 
+#include"conectionDetails.h"
+
 #include <iostream>
 #include <vector>
 #include <thread>
