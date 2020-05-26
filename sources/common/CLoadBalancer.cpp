@@ -194,8 +194,8 @@ int CLoadBalancer::clearStations(){
 void *CLoadBalancer::thread_timeFn(void *request){
 	static int poz = 0;
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	auto timePast = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
-	if (timePast > 60)
+	auto timePast = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
+	if (timePast >= 10)
 	{	
 		if(_Infos.requests_per_minute.size()==10) {
 			
@@ -207,6 +207,9 @@ void *CLoadBalancer::thread_timeFn(void *request){
 		begin = end;
 		_request_in_a_minute = 0;
 	}
+
+	return NULL;
+
 }
 
 void *CLoadBalancer::thread_processFn(void *pck){
@@ -264,6 +267,9 @@ void CLoadBalancer::initNetworkData(int i, int portno, const char *serverIP){
 			  (char *)&serverData[i].serv_addr.sin_addr.s_addr,
 			  serverData[i].server->h_length);
 		serverData[i].serv_addr.sin_port = htons(portno);
+
+		printf("[C++] Connecting to address %s, port %d\n", serverIP, portno);
+
 	}
 }
 
@@ -286,18 +292,16 @@ void CLoadBalancer::ConnectToServer(int i, const char *packType){
 		printf("[C++]LoadBalancer-->ERROR reading from socket");
 
 	setCapcity(i, serverData[i].buffer);
-	int count = 0;
+	int sum = 0;
 	for (int i = 0; i < noStations; i++)
 	{
 
 		auto f = _servers[i]->getSolicitation();
-		if (f != 0)
-			count++;
-		printf("[C++]LoadBalancer_Server %d = %f\n", i, f);
-		_serverDetails[i].number_of_cores = 2 - f / 100 * 2;
+		sum += f;
+		_serverDetails[i].number_of_occupied_cores = f / 100 * 2;
 		_serverDetails[i].cores_load = f;
 	}
-	_Infos.total_load = noStations * 2 / count * 100;
+	_Infos.total_load = sum / noStations;
 	
 	close(serverData[i].sockfd);
 }
@@ -340,9 +344,6 @@ int CLoadBalancer::waitForPacket(){
 	}
 	return 1;
 }
-
-
-
 
 void CLoadBalancer::processPacket(){
 

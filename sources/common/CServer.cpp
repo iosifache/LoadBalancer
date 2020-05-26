@@ -147,6 +147,7 @@ int CServer::selectTask(int task){
 	int factor = _loaded;
 	if (_loaded < 1)
 		factor = 2;
+	factor = rand() % 10 + 3;
 	switch (task)
 	{
 	case 3:

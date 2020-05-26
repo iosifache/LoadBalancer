@@ -51,7 +51,7 @@ SERVER_EXECUTABLE_FILE = $(BUILD_FOLDER)/server
 .ONESHELL: run
 
 # Target for running all targets for Sciter build
-all: clean build_sciter
+all: clean build_load_balancer_sciter build_server
 
 # Target for running the executable
 run:

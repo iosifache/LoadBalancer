@@ -19,10 +19,9 @@
 
 void *RunLoadBalancer(void *nothing_here){
 
-    CLoadBalancer::getInstance(1111);
-    CLoadBalancer::addPackets(20);
+    CLoadBalancer::getInstance(1114, "127.0.0.1");
+    CLoadBalancer::addPackets(2000);
     CLoadBalancer::running();
-    CLoadBalancer::removeInstance();
 
     // Return
     return NULL;
