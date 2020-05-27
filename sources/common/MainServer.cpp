@@ -5,8 +5,8 @@
 
 int main(int argc, char **argv){
 
-	printf("[CServer C++]-->Init server on port: %s \n", argv[1]);
-	CServer s1(atoi(argv[1]), 2);
+	printf("[CServer C++]-->Init server on port: %s \n", PORT_NO );
+	CServer s1( PORT_NO ,2);
 	while (1){
 		s1.listenForConnection();
 	}

@@ -150,7 +150,7 @@ CLoadBalancer::CLoadBalancer(int el, const char* IpAddr){
 	serverData = new _networkData[noStations];
 	for (int i = 0; i < noStations; i++)
 	{
-		printf("[C++]LoadBalancer-->Initialization server connections %d \n", i);
+		//printf("[C++]LoadBalancer-->Initialization server connections %d \n", i);
 	}
 }
 
@@ -226,6 +226,9 @@ void *CLoadBalancer::thread_processFn(void *pck){
 	{
 		_request_in_a_minute++;
 		sendPacketNetwork((iPacket *)pck);
+		//random time SPER
+		srand(time(NULL));
+		sleep(rand()%4+1);
 	}
 
 	return NULL;
@@ -237,7 +240,7 @@ void *CLoadBalancer::thread_responsFn(void *pck){
 		while (_responseQueue.size() > 0)
 		{
 			_responseQueue.pop_back();
-			printf("[C++]LoadBalancer-->Packet process\n");
+			//printf("[C++]LoadBalancer-->Packet process\n");
 		}
 	}
 
@@ -283,7 +286,7 @@ void CLoadBalancer::ConnectToServer(int i, const char *packType){
 	
 	strcpy(serverData[i].buffer, packType);
 	int n = write(serverData[i].sockfd, serverData[i].buffer, strlen(serverData[i].buffer));
-	printf("------------------------------------------\n\n\n ");
+	//printf("------------------------------------------\n\n\n ");
 	if (n < 0)
 		printf("[C++]LoadBalancer-->ERROR writing to socket");
 	bzero(serverData[i].buffer, 256);
@@ -312,8 +315,17 @@ void CLoadBalancer::sendPacketNetwork(iPacket *pck){
 	int current = findAvailableStation();
 
 	if (current != -1)
-	{
-		initNetworkData(current, PortNOO + current, IpAddress.c_str());
+	{	
+		if (current == 0)
+		{
+			initNetworkData(current, PORT_NO, SERVER_1_IP_ADDRESS);
+		}else
+		{
+			initNetworkData(current, PORT_NO, SERVER_2_IP_ADDRESS);
+		}
+		
+		
+		
 		ConnectToServer(current, "3");
 	}
 	else
@@ -322,7 +334,12 @@ void CLoadBalancer::sendPacketNetwork(iPacket *pck){
 
 		for (int i = 0; i < noStations; i++)
 		{
-			initNetworkData(i % noStations, PortNOO + i % noStations, "127.0.0.1");
+			//initNetworkData(i % noStations, PortNOO + i % noStations, "127.0.0.1");
+			if(i==0)
+			initNetworkData(i % noStations, PORT_NO, SERVER_1_IP_ADDRESS);
+			else 
+			initNetworkData(i % noStations, PORT_NO, SERVER_2_IP_ADDRESS);
+			
 			ConnectToServer(i % noStations, "1010");
 		}
 
