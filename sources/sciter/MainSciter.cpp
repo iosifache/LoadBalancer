@@ -6,7 +6,7 @@
 
 #pragma endregion
 
-#pragma region MainFunction
+#pragma region SciterMainFunction
 
 int uimain(std::function<int()> run){
 

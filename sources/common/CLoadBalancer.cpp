@@ -1,4 +1,8 @@
+#include <errno.h>
 #include "CLoadBalancer.h"
+#include "ColoredLog.h"
+
+extern int errno ;
 
 CLoadBalancer *CLoadBalancer::_pInstance = NULL;
 
@@ -78,7 +82,7 @@ void CLoadBalancer::running(){
 			err = pthread_create(&thTime, NULL, thread_timeFn, NULL);
 			pthread_join(thTime, NULL);
 			//pthread_join(thRespons, NULL);
-			printf("[C++]LoadBalancer-->Processing... \n");
+			COLORED_LOG(COLOR_BLUE, "The processing of a packet started", NULL);
 			sleep(2);
 		}
 	}
@@ -143,14 +147,14 @@ CLoadBalancer::CLoadBalancer(int el, const char* IpAddr){
 
 	if (!initStations())
 	{
-		std::cout << "Error initianing stations \n";
+		COLORED_LOG(COLOR_RED, "Error on server initialization");
 		exit(1);
 	}
 	PortNOO = el;
 	serverData = new _networkData[noStations];
 	for (int i = 0; i < noStations; i++)
 	{
-		//printf("[C++]LoadBalancer-->Initialization server connections %d \n", i);
+		;
 	}
 }
 
@@ -240,7 +244,6 @@ void *CLoadBalancer::thread_responsFn(void *pck){
 		while (_responseQueue.size() > 0)
 		{
 			_responseQueue.pop_back();
-			//printf("[C++]LoadBalancer-->Packet process\n");
 		}
 	}
 
@@ -256,12 +259,12 @@ void CLoadBalancer::initNetworkData(int i, int portno, const char *serverIP){
 		serverData[i].sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
 		if (serverData[i].sockfd < 0)
-			printf("[C++]LoadBalancer-->ERROR opening socket");
+			COLORED_LOG(COLOR_RED, "Error on socket opening");
 
 		serverData[i].server = gethostbyname(serverIP);
 		if (serverData[i].server == NULL)
 		{
-			printf("[C++]LoadBalancer-->ERROR, no such host\n");
+			COLORED_LOG(COLOR_RED, "Error on connecting to address %s and port %d", serverIP, portno);
 			exit(0);
 		}
 		bzero((char *)&serverData[i].serv_addr, sizeof(serverData[i].serv_addr));
@@ -271,7 +274,7 @@ void CLoadBalancer::initNetworkData(int i, int portno, const char *serverIP){
 			  serverData[i].server->h_length);
 		serverData[i].serv_addr.sin_port = htons(portno);
 
-		printf("[C++] Connecting to address %s, port %d\n", serverIP, portno);
+		COLORED_LOG(COLOR_BLUE, "Connected to address %s and port %d", serverIP, portno);
 
 	}
 }
@@ -280,19 +283,18 @@ void CLoadBalancer::ConnectToServer(int i, const char *packType){
 
 	int stat = connect(serverData[i].sockfd, (struct sockaddr *)&serverData[i].serv_addr, sizeof(serverData[i].serv_addr));
 	if (stat < 0)
-		printf("[C++]LoadBalancer-->ERROR connecting\n");
+		COLORED_LOG(COLOR_RED, "Error on connecting");
 
 	bzero(serverData[i].buffer, 256);
 	
 	strcpy(serverData[i].buffer, packType);
 	int n = write(serverData[i].sockfd, serverData[i].buffer, strlen(serverData[i].buffer));
-	//printf("------------------------------------------\n\n\n ");
 	if (n < 0)
-		printf("[C++]LoadBalancer-->ERROR writing to socket");
+		COLORED_LOG(COLOR_RED, "Error on writing to socket");
 	bzero(serverData[i].buffer, 256);
 	n = read(serverData[i].sockfd, serverData[i].buffer, 255);
 	if (n < 0)
-		printf("[C++]LoadBalancer-->ERROR reading from socket");
+		COLORED_LOG(COLOR_RED, "Error on reading from socket");
 
 	setCapcity(i, serverData[i].buffer);
 	int sum = 0;
@@ -318,10 +320,10 @@ void CLoadBalancer::sendPacketNetwork(iPacket *pck){
 	{	
 		if (current == 0)
 		{
-			initNetworkData(current, PORT_NO, SERVER_1_IP_ADDRESS);
+			initNetworkData(current, SERVER_PORT_NUMBER, FIRST_SERVER_IP_ADDRESS);
 		}else
 		{
-			initNetworkData(current, PORT_NO, SERVER_2_IP_ADDRESS);
+			initNetworkData(current, SERVER_PORT_NUMBER, SECOND_SERVER_IP_ADDRESS);
 		}
 		
 		
@@ -330,15 +332,15 @@ void CLoadBalancer::sendPacketNetwork(iPacket *pck){
 	}
 	else
 	{
-		printf("[C++]LoadBalancer-->Servers full packet added in queue: \n");
+		COLORED_LOG(COLOR_YELLOW, "Server is full, but packets are added into the queue");
 
 		for (int i = 0; i < noStations; i++)
 		{
 			//initNetworkData(i % noStations, PortNOO + i % noStations, "127.0.0.1");
 			if(i==0)
-			initNetworkData(i % noStations, PORT_NO, SERVER_1_IP_ADDRESS);
+			initNetworkData(i % noStations, SERVER_PORT_NUMBER, FIRST_SERVER_IP_ADDRESS);
 			else 
-			initNetworkData(i % noStations, PORT_NO, SERVER_2_IP_ADDRESS);
+			initNetworkData(i % noStations, SERVER_PORT_NUMBER, SECOND_SERVER_IP_ADDRESS);
 			
 			ConnectToServer(i % noStations, "1010");
 		}
@@ -354,7 +356,7 @@ int CLoadBalancer::waitForPacket(){
 		auto aa = _servers[i]->getSolicitation();
 		if (aa != 0.0)
 		{
-			printf("[C++]LoadBalancer-->Need more time to process packet before exit\n");
+			COLORED_LOG(COLOR_YELLOW, "More time is needed to process packet before exit");
 			processPacket();
 			return 0;
 		}
@@ -367,7 +369,7 @@ void CLoadBalancer::processPacket(){
 	 for (int i = 0; i < noStations; i++) {
 		_servers[i]->do_work();
 		 if(_servers[i]->doneProcessing() == true) {
-			std::cout << "Packet server"<<i<<" "<<"process\n";
+			COLORED_LOG(COLOR_GREEN, "Packet was processed by server #%d", i);
 			 _responseQueue.push_back(new CPacket);
 		 }
 	 }
@@ -383,7 +385,7 @@ void CLoadBalancer::sendPacket(iPacket *pck){
 	}
 	else
 	{
-		printf("[C++]LoadBalancer-->Servers full packet added in queue \n");
+		COLORED_LOG(COLOR_YELLOW, "Server is full, but packets are added into the queue");
 		_packetQueue.push_back(pck);
 	}
 }

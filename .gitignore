@@ -1,0 +1,9 @@
+# Visual Studio Code configuration
+.vscode
+
+# Resources C++ source from Sciter
+sources/sciter/Resources.cpp
+
+# Binaries
+build/load_balancer                                                                                                                      
+build/server

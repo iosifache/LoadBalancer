@@ -2,11 +2,13 @@
 #include <iostream>
 #include <vector>
 #include "CServer.h"
+#include "ColoredLog.h"
 
 int main(int argc, char **argv){
 
-	printf("[CServer C++]-->Init server on port: %s \n", PORT_NO );
-	CServer s1( PORT_NO ,2);
+	COLORED_LOG(COLOR_BLUE, "Init server on port %d", SERVER_PORT_NUMBER);
+
+	CServer s1( SERVER_PORT_NUMBER ,2);
 	while (1){
 		s1.listenForConnection();
 	}

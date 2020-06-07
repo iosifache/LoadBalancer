@@ -2,11 +2,10 @@
 
 #define _CLOAD_BALANCER_H_
 
-#include"conectionDetails.h"
+#include"ConnectionDetails.h"
 
 #include "CServer.h"
 #include "CPacket.h"
-#include "ILoadBalancer.h"
 
 #include <iostream>
 #include <queue>
@@ -38,6 +37,18 @@ typedef struct {
 	struct sockaddr_in serv_addr;
 }_networkData;
 
+
+typedef struct {
+    int number_of_managed_servers;
+    int total_load;
+    std::vector<int> requests_per_minute;
+} LoadBalancerInfos;
+
+typedef struct {
+    int number_of_cores;
+    int number_of_occupied_cores;
+    int cores_load;
+} ServerInfos;
 
 /*
  * Main Class references to LoadBalancer~LoadB

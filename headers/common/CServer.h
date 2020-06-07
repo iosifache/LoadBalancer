@@ -2,7 +2,7 @@
 
 #define _CSERVER_
 
-#include"conectionDetails.h"
+#include"ConnectionDetails.h"
 
 #include <iostream>
 #include <vector>

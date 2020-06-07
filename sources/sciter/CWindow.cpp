@@ -5,13 +5,16 @@
 #include <locale>
 #include <codecvt>
 #include "CWindow.h"
+#include "ConnectionDetails.h"
+#include "ColoredLog.h"
 #include "aux-cvt.h"
 
 #pragma endregion
 
 #pragma region Configuration
 
-#define MAX_BUFFER_LENGTH                128
+#define SENDED_PACKETS 2000
+#define MAX_BUFFER_LENGTH 128
 
 #pragma endregion
 
@@ -19,8 +22,8 @@
 
 void *RunLoadBalancer(void *nothing_here){
 
-    CLoadBalancer::getInstance(1114, "127.0.0.1");
-    CLoadBalancer::addPackets(2000);
+    CLoadBalancer::getInstance(LOAD_BALANCER_PORT_NUMBER, "");
+    CLoadBalancer::addPackets(SENDED_PACKETS);
     CLoadBalancer::running();
 
     // Return
@@ -48,7 +51,7 @@ sciter::string CWindow::GetLoadBalancerInfos(){
     
     // Serialize informations
     serialized = CWindow::SerializeLoadBalancerInfos(&infos);
-    printf("[C++] Serialized datas about load balancer: %s\n", serialized);
+    COLORED_LOG(COLOR_GREEN, "Serialized datas about load balancer: %s", serialized);
     intermediate = serialized;
     result = convert.from_bytes(intermediate);
 
@@ -71,7 +74,7 @@ sciter::string CWindow::GetServerInfo(sciter::value server_id){
     
     // Serialize informations
     serialized = CWindow::SerializeServerInfos(&infos);
-    printf("[C++] Serialized datas about server #%d: %s\n", argument, serialized);
+    COLORED_LOG(COLOR_GREEN, "Serialized datas about server #%d: %s", argument, serialized);
     intermediate = serialized;
     result = convert.from_bytes(intermediate);
 

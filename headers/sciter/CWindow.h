@@ -15,27 +15,27 @@ class CWindow: public sciter::window{
 
 	public:
 
-        // Constructor
+		// Constructor
 		CWindow();
 
-        // Method that informations about load balancer and servers
-        sciter::string GetLoadBalancerInfos();
-        sciter::string GetServerInfo(sciter::value server_id);
+		// Method that informations about load balancer and servers
+		sciter::string GetLoadBalancerInfos();
+		sciter::string GetServerInfo(sciter::value server_id);
 
-        // Map of native functions exposed to TIScript
+		// Map of native functions exposed to TIScript
 		BEGIN_FUNCTION_MAP
-            FUNCTION_0("GetLoadBalancerInfos", GetLoadBalancerInfos);
-            FUNCTION_1("GetServerInfo", GetServerInfo);
+			FUNCTION_0("GetLoadBalancerInfos", GetLoadBalancerInfos);
+			FUNCTION_1("GetServerInfo", GetServerInfo);
 		END_FUNCTION_MAP
 
-    private:
+	private:
 
-        // Members
-        pthread_t load_balancer_thread;
+		// Members
+		pthread_t load_balancer_thread;
 
-        // Methods that serialize infos that will be sended to UI
-        static char *SerializeLoadBalancerInfos(LoadBalancerInfos *infos);
-        static char *SerializeServerInfos(ServerInfos *infos);
+		// Methods that serialize infos that will be sended to UI
+		static char *SerializeLoadBalancerInfos(LoadBalancerInfos *infos);
+		static char *SerializeServerInfos(ServerInfos *infos);
 
 };
 

@@ -1,6 +1,7 @@
 #include <pthread.h>
 #include "CServer.h"
 #include "CPacket.h"
+#include "ColoredLog.h"
 
 #define BASE_OPERATION 1000
 #define AUTHENTIFICATION (BASE_OPERATION + 1)
@@ -16,7 +17,7 @@ CServer::CServer(unsigned noProcess)
 	_process = new int[_noProcess];
 	_myProcess.reserve(noProcess);
 	if (_process == NULL)
-		std::cout << "Error creating process\n";
+		COLORED_LOG(COLOR_RED, "Error on creating process");
 	for (int i = 0; i < _noProcess; i++)
 	{
 		_process[i] = READY_STATE;
@@ -33,7 +34,7 @@ CServer::CServer(int portno, unsigned noProcess)
 	_process = new int[_noProcess];
 	_myProcess.reserve(noProcess);
 	if (_process == NULL)
-		std::cout << "Error creating process\n";
+		COLORED_LOG(COLOR_RED, "Error on creating process");
 	for (int i = 0; i < _noProcess; i++)
 	{
 		_process[i] = READY_STATE;
@@ -47,8 +48,6 @@ CServer::CServer(int portno, unsigned noProcess)
 
 // CServer::CServer() {
 //	_process = new int[2]; // CONST VALUE CHANGE
-//	if (_process == NULL)
-//		std::cout << "Error creating process\n";
 //}
 
 CServer::~CServer(){
@@ -64,20 +63,17 @@ iPacket *CServer::processPacket(iPacket &obj){
 
 	srand(time(NULL));
 	int time = rand() % 3 + 1;
-	printf("[C++]CServer-->Time past: %d\n", time);
 	while (time-- > 0)
 	{
 		do_work();
 	}
 	int timp = selectTask(obj.getMethod());
 
-	// printf("TIME :%d \n",timp);
 	if (timp < 0)
 	{
 
 		return NULL;
 	}
-	// printf("Process packet \n");
 	// if (_loaded == _noProcess)
 	// 	return NULL;
 
@@ -85,9 +81,7 @@ iPacket *CServer::processPacket(iPacket &obj){
 
 	if (nextServer != -1)
 	{
-
-		printf("[C++]CServer-->Pass task to core %d\n", nextServer);
-		printf("[C++]CServer---->Estimating time for process packet: %d\n", timp);
+		COLORED_LOG(COLOR_BLUE, "Core #%d received a task to process", nextServer);
 		setProcessBusy(nextServer, timp);
 	}
 	return NULL;
@@ -110,7 +104,6 @@ bool CServer::doneProcessing(){
 bool CServer::isAvailable(){
 	for (int i = 0; i < _noProcess; i++)
 	{
-		// printf("******process %d******\n",i);
 		if (_myProcess[i].state == READY_STATE)
 			return true;
 	}
@@ -193,7 +186,7 @@ void CServer::do_work(){
 			_myProcess[i].remainingTime -= 1;
 			if (_myProcess[i].remainingTime == 0)
 			{
-				printf("[C++]CServer-->Core %d finished task \n", i);
+				COLORED_LOG(COLOR_GREEN, "Core #%d finished the processing of a request", i);
 				_myProcess[i].state = READY_STATE;
 				_loaded -= 1;
 			}
@@ -211,7 +204,7 @@ void CServer::setProcessBusy(int no, int time){
 void CServer::initConnection(int portno){
 	_serverCon.sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverCon.sockfd < 0)
-		printf("[C++]CServer-->ERROR opening socket");
+		COLORED_LOG(COLOR_RED, "Error on creating a socket", NULL);
 	bzero((char *)&_serverCon.serv_addr, sizeof(_serverCon.serv_addr));
 	portno = portno;
 	_serverCon.serv_addr.sin_family = AF_INET;
@@ -220,7 +213,7 @@ void CServer::initConnection(int portno){
 	int st = bind(_serverCon.sockfd, (struct sockaddr *)&_serverCon.serv_addr,
 				  sizeof(_serverCon.serv_addr));
 	if (st < 0)
-		printf("[C++]CServer-->ERROR on binding");
+		COLORED_LOG(COLOR_RED, "Error on socket binding", NULL);
 }
 
 void *CServer::thread_processFn(void *pck) { return NULL; }
@@ -232,17 +225,16 @@ void CServer::listenForConnection(){
 		accept(_serverCon.sockfd, (struct sockaddr *)&_serverCon.cli_addr,
 			   &_serverCon.clilen);
 	if (_serverCon.newsockfd < 0)
-		printf("[C++]CServer-->ERROR on accept");
+	COLORED_LOG(COLOR_RED, "Error on socket accepting", NULL);
 	bzero(_serverCon.buffer, 256);
 	std::string mess = "";
 	int n = read(_serverCon.newsockfd, _serverCon.buffer, 255);
 	if (n < 0)
-		printf("[C++]CServer-->ERROR reading from socket");
-	printf("\n [C++]CServer-->Packet received \n");
+		COLORED_LOG(COLOR_RED, "Error on reading from socket", NULL);
+	COLORED_LOG(COLOR_BLUE, "A new request was received", NULL);
 	{
 		CPacket tmp(_serverCon.buffer);
 
-		// printf("process to th\n");
 		// th = std::thread(thread_processFn,(void *)&tmp);
 		// th.join();
 		// pthread_join(thProcess, NULL);
@@ -259,14 +251,12 @@ void CServer::listenForConnection(){
 				mess += "0;";
 		}
 	}
-	// printf(" Message: %s \n",mess.c_str());
 	n = write(_serverCon.newsockfd, mess.c_str(), mess.size());
 	if (n < 0)
-		printf("[C++]CServer-->ERROR writing to socket");
+		COLORED_LOG(COLOR_RED, "Error on writing to socket", NULL);
 }
 
 void CServer::setCapacity(int nrProcess, int val, int load){
-	// printf("rn proc : %d %d ----------\n"  ,nrProcess,val);
 	//_loaded= load;
 	if (val == 0)
 	{

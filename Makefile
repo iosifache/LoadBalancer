@@ -1,13 +1,12 @@
-# Compiler and linker's flags
+# Flags for compiler and linker
 CPP = g++
 CPP_FLAGS = -g
 SCITER_LINK_FLAGS = `pkg-config --cflags --libs gtk+-3.0` -ldl
 MULTI_THREATHING_LINK_FLAGS = -lpthread -pthread
 
-# Project's components 
+# Project's components
 COMMON_BUILD = common
 SCITER_BUILD = sciter
-CLI_BUILD = cli
 
 # Project's folders
 UI_FOLDER = ui
@@ -17,12 +16,10 @@ BUILD_FOLDER = build
 COMMON_HEADER_FOLDER = $(HEADER_FOLDER)/$(COMMON_BUILD)
 SCITER_HEADER_FOLDER = $(HEADER_FOLDER)/$(SCITER_BUILD)
 COMMON_SOURCE_FOLDER = $(SOURCE_FOLDER)/$(COMMON_BUILD)
-CLI_SOURCE_FOLDER = $(SOURCE_FOLDER)/$(CLI_BUILD)
 SCITER_SOURCE_FOLDER = $(SOURCE_FOLDER)/$(SCITER_BUILD)
 
 # Project's files
 COMMON_SOURCE_FILES = $(COMMON_SOURCE_FOLDER)/*
-CLI_SOURCE_FILES = $(CLI_SOURCE_FOLDER)/*
 SCITER_SOURCE_FILES = $(SCITER_SOURCE_FOLDER)/*
 
 # Sciter's folder and files
@@ -38,35 +35,29 @@ SCITER_MAIN_LIBRARY = $(SCITER_LIBRARIES_FOLDER)/libsciter-gtk.so
 
 # Build source files
 SERVER_SOURCE_FILES = $(COMMON_SOURCE_FOLDER)/CPacket.cpp $(COMMON_SOURCE_FOLDER)/CServer.cpp $(COMMON_SOURCE_FOLDER)/MainServer.cpp
-LOAD_BALANCER_CLI_SOURCE_FILES = $(COMMON_SOURCE_FOLDER)/CPacket.cpp $(COMMON_SOURCE_FOLDER)/CServer.cpp $(COMMON_SOURCE_FOLDER)/CLoadBalancer.cpp $(COMMON_SOURCE_FOLDER)/MainLoadBalancer.cpp
-LOAD_BALANCER_SCITER_SOURCE_FILES = $(COMMON_SOURCE_FOLDER)/CPacket.cpp $(COMMON_SOURCE_FOLDER)/CServer.cpp $(COMMON_SOURCE_FOLDER)/CLoadBalancer.cpp $(SCITER_SOURCE_FILES)
+LOAD_BALANCER_SOURCE_FILES = $(COMMON_SOURCE_FOLDER)/CPacket.cpp $(COMMON_SOURCE_FOLDER)/CServer.cpp $(COMMON_SOURCE_FOLDER)/CLoadBalancer.cpp $(SCITER_SOURCE_FILES)
 
-# Final executable filename
-CLI_LOAD_BALANCER_EXECUTABLE_FILE = $(BUILD_FOLDER)/cli_load_balancer
-SCITER_LOAD_BALANCER_EXECUTABLE_FILE = $(BUILD_FOLDER)/sciter_load_balancer
+# Executables filenames
+LOAD_BALANCER_EXECUTABLE_FILE = $(BUILD_FOLDER)/load_balancer
 SERVER_EXECUTABLE_FILE = $(BUILD_FOLDER)/server
 
 # Special attributes for targets
 .PHONY: run
 .ONESHELL: run
 
-# Target for running all targets for Sciter build
-all: clean build_load_balancer_sciter build_server
+# Target for running all build targets
+all: clean build_load_balancer build_server
 
-# Target for running the executable
+# Target for running the load balancer
 run:
 	export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(SCITER_LIBRARIES_FOLDER)
-	./$(SCITER_LOAD_BALANCER_EXECUTABLE_FILE)
+	./$(LOAD_BALANCER_EXECUTABLE_FILE)
 
-# Target for building the Sciter load balancer
-build_load_balancer_sciter:
+# Target for building the load balancer
+build_load_balancer:
 	chmod +x $(SCITER_UI_PACKER)
 	$(SCITER_UI_PACKER) $(UI_FOLDER) $(SCITER_SOURCE_FOLDER)/Resources.cpp -v "resources"
-	$(CPP) $(CPP_FLAGS) $(LOAD_BALANCER_SCITER_SOURCE_FILES) $(SCITER_GTK_MAIN_SOURCE_FILE) -I $(SCITER_INCLUDE_FOLDER) -I $(COMMON_HEADER_FOLDER) -I $(SCITER_HEADER_FOLDER) -L $(SCITER_LIBRARIES_FOLDER) $(SCITER_MAIN_LIBRARY) $(SCITER_LINK_FLAGS) -o $(SCITER_LOAD_BALANCER_EXECUTABLE_FILE)
-
-# Target for building the CLI load balancer
-build_load_balancer_cli:
-	$(CPP) $(CPP_FLAGS) $(LOAD_BALANCER_CLI_SOURCE_FILES) -I $(COMMON_HEADER_FOLDER) $(MULTI_THREATHING_LINK_FLAGS) -o $(CLI_LOAD_BALANCER_EXECUTABLE_FILE)
+	$(CPP) $(CPP_FLAGS) $(LOAD_BALANCER_SOURCE_FILES) $(SCITER_GTK_MAIN_SOURCE_FILE) -I $(SCITER_INCLUDE_FOLDER) -I $(COMMON_HEADER_FOLDER) -I $(SCITER_HEADER_FOLDER) -L $(SCITER_LIBRARIES_FOLDER) $(SCITER_MAIN_LIBRARY) $(SCITER_LINK_FLAGS) -o $(LOAD_BALANCER_EXECUTABLE_FILE)
 
 # Target for building the servers
 build_server:
